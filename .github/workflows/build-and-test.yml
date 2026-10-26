@@ -2,7 +2,9 @@ name: build-and-test.yml
 on:
   pull_request:
     branches:
-      - dev
+      - main
+  push:
+    branches:
       - main
 
 jobs:
