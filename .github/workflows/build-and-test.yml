@@ -49,4 +49,7 @@ jobs:
         uses: actions/upload-artifact@v7.0.2
         with:
           name: application-jar
-          path: target/*.jar
+          path: |
+            engine/target/*.jar
+            benchmarks/target/*.jar
+          if-no-files-found: error
