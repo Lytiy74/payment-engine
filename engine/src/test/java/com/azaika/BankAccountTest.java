@@ -157,7 +157,7 @@ public class BankAccountTest {
     void withdraw_exceedingBalance_throws() {
         Account account = bank.findById(1).get();
 
-        assertThrows(IllegalStateException.class, () -> account.withdraw(balance + 1));
+        assertThrows(IllegalStateException.class, () -> account.withdraw(INITIAL_BALANCE + 1));
         long balance = account.getBalance();
         assertEquals(INITIAL_BALANCE, balance);
     }
