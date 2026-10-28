@@ -1,32 +1,33 @@
 package com.azaika;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
-public class Bank {
+public final class Bank {
 
-    private final List<Account> accounts;
+    private final Map<Long, Account> accounts;
 
-    public Bank() {
-        this.accounts = new ArrayList<>();
-        init();
+    public Bank(int accountCount, long initialBalance) {
+        this.accounts = new HashMap<>();
+        init(accountCount, initialBalance);
     }
 
-    public Optional<Account> findById(int id) {
-        return Optional.of(accounts.get(id));
+    public Optional<Account> findById(long id) {
+        return Optional.ofNullable(accounts.get(id));
     }
 
     public long totalBalance() {
         return accounts
+                .values()
                 .stream()
                 .mapToLong(Account::getBalance)
                 .sum();
     }
 
-    private void init() {
-        for (int i = 0; i < 10; i++) {
-            accounts.add(new Account(i, 100_000));
+    private void init(int accountCount, long initialBalance) {
+        for (long i = 0; i < accountCount; i++) {
+            accounts.put(i, new Account(i, initialBalance));
         }
     }
 }
