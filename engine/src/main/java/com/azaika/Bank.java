@@ -1,8 +1,6 @@
 package com.azaika;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public final class Bank {
 

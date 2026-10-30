@@ -20,24 +20,6 @@ public final class Account {
         return id;
     }
 
-    public void transfer(long amount, Account target) {
-        if (target == null) {
-            throw new IllegalArgumentException("Target account must not be null");
-        }
-        if (target == this) {
-            throw new IllegalArgumentException("Cannot transfer to self");
-        }
-        if (amount <= 0) {
-            throw new IllegalArgumentException("Amount must be positive");
-        }
-        if (balance < amount) {
-            throw new IllegalStateException("Insufficient balance");
-        }
-        long newBalance = balance - amount;
-        target.balance = Math.addExact(target.balance, amount);
-        this.balance = newBalance;
-    }
-
     public void deposit(long amount) {
         if (amount <= 0) {
             throw new IllegalArgumentException("Amount must be positive");
@@ -47,12 +29,19 @@ public final class Account {
 
     public void withdraw(long amount) {
         if (amount <= 0) {
-            throw new IllegalArgumentException("Amount must be positive");
+            throw new IllegalArgumentException("Amount must be non-negative");
         }
-        if (balance < amount) {
-            throw new IllegalStateException("Insufficient balance");
+        if (amount > balance) {
+            throw new IllegalStateException("Insufficient funds");
         }
         balance -= amount;
     }
 
+    @Override
+    public String toString() {
+        return "Account{" +
+                "balance=" + balance +
+                ", id=" + id +
+                '}';
+    }
 }
