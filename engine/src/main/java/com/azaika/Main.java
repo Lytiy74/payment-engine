@@ -5,14 +5,17 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Main {
+    private static AtomicInteger err = new AtomicInteger(0);
+    private static AtomicInteger success = new AtomicInteger(0);
 
 
     public static void main(String[] args) {
         Instant start = Instant.now();
 
-        System.out.println("Cores: " +Runtime.getRuntime().availableProcessors());
+        System.out.println("Cores: " + Runtime.getRuntime().availableProcessors());
         int initialBalance = 100_000;
         int accountCount = 10;
         Bank bank = new Bank(accountCount, initialBalance);
@@ -32,6 +35,8 @@ public class Main {
         System.out.println("Difference : " + (exepctedSum - bank.totalBalance()));
         Instant end = Instant.now();
         System.out.println("Time: " + Duration.between(start, end));
+        System.out.println("Err: " + err.get());
+        System.out.println("Success: " + success.get());
     }
 
     private static List<Thread> getThreads(Bank bank, int accountCount) {
@@ -46,8 +51,17 @@ public class Main {
                 for (int j = 0; j < 100_000; j++) {
                     int fromId = random.nextInt(accountCount);
                     int targetId = random.nextInt(accountCount);
-                    int randomAmount = random.nextInt();
-                    service.transfer(fromId, targetId, randomAmount);
+                    int randomAmount = random.nextInt(100_000);
+                    try {
+                        boolean transfer = service.transfer(fromId, targetId, randomAmount);
+                        if (!transfer) {
+                            err.incrementAndGet();
+                        } else {
+                            success.incrementAndGet();
+                        }
+                    } catch (IllegalStateException ignored) {
+                        err.incrementAndGet();
+                    }
                 }
             });
             threads.add(thread);
