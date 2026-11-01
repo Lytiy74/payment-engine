@@ -21,10 +21,19 @@ public final class Account {
     }
 
     public void deposit(long amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
+        }
         balance = Math.addExact(balance, amount);
     }
 
     public void withdraw(long amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be non-negative");
+        }
+        if (amount > balance) {
+            throw new IllegalStateException("Insufficient funds");
+        }
         balance -= amount;
     }
 

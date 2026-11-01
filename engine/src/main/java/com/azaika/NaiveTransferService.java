@@ -15,6 +15,10 @@ public class NaiveTransferService implements TransferService {
             return false;
         }
 
+        if (fromId == toId) {
+            return false;
+        }
+
         Optional<Account> source = bank.findById(fromId);
         if (source.isEmpty()) {
             return false;
@@ -26,6 +30,10 @@ public class NaiveTransferService implements TransferService {
         }
 
         if (source.get().getBalance() < amount) {
+            return false;
+        }
+
+        if (target.get().getBalance() + amount < 0) {
             return false;
         }
 
