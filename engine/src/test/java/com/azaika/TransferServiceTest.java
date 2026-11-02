@@ -98,6 +98,18 @@ public class TransferServiceTest {
     }
 
     @Test
+    void transfer_maxValue_returnsTrue() {
+        Account source = bank.findById(1).get();
+        Account target = bank.findById(2).get();
+
+        target.deposit(Long.MAX_VALUE - target.getBalance() - INITIAL_BALANCE);
+
+        assertTrue(transferService.transfer(source.getId(), target.getId(), INITIAL_BALANCE));
+        assertEquals(0, source.getBalance());
+        assertEquals(Long.MAX_VALUE, target.getBalance());
+    }
+
+    @Test
     void transfer_unknownAccount_returnsFalse() {
         Account source = bank.findById(1).get();
 

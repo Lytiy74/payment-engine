@@ -33,7 +33,7 @@ public class NaiveTransferService implements TransferService {
             return false;
         }
 
-        if (target.get().getBalance() + amount < 0) {
+        if (target.get().getBalance() > (Long.MAX_VALUE - amount)) {
             return false;
         }
 

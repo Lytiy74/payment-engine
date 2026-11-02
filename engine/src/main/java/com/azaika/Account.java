@@ -37,4 +37,11 @@ public final class Account {
         balance -= amount;
     }
 
+    @Override
+    public String toString() {
+        return "Account{" +
+                "balance=" + balance +
+                ", id=" + id +
+                '}';
+    }
 }
