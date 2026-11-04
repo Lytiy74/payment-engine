@@ -110,11 +110,19 @@ public class TransferServiceTest {
     }
 
     @Test
-    void transfer_unknownAccount_returnsFalse() {
+    void transfer_targetUnknownAccount_returnsFalse() {
         Account source = bank.findById(1).get();
 
         assertFalse(transferService.transfer(source.getId(), 1000, 1));
         assertEquals(INITIAL_BALANCE, source.getBalance());
+    }
+
+    @Test
+    void transfer_sourceUnknownAccount_returnsFalse() {
+        Account target = bank.findById(1).get();
+
+        assertFalse(transferService.transfer(1000, target.getId(), 1));
+        assertEquals(INITIAL_BALANCE, target.getBalance());
     }
 
 }

@@ -8,19 +8,22 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.LongAdder;
 
 public class Main {
-    private final static LongAdder rejected = new LongAdder();
-    private final static LongAdder raceFailure = new LongAdder();
-    private final static LongAdder success = new LongAdder();
+    private static final int INITIAL_BALANCE = 100_000;
+    private static final int TRANSFERS_PER_THREAD = 100_000;
+    private static final int MAX_TRANSFER_AMOUNT = 100_000;
+    private static final int ACCOUNT_COUNT = 10;
+    private static final int THREAD_COUNT = 20;
+    private static final LongAdder rejected = new LongAdder();
+    private static final LongAdder raceFailure = new LongAdder();
+    private static final LongAdder success = new LongAdder();
 
 
     public static void main(String[] args) {
-        Instant start = Instant.now();
+        printConfig();
 
-        System.out.println("Cores: " + Runtime.getRuntime().availableProcessors());
-        int initialBalance = 100_000;
-        int accountCount = 10;
-        Bank bank = new Bank(accountCount, initialBalance);
-        List<Thread> threads = getThreads(bank, accountCount);
+        Instant start = Instant.now();
+        Bank bank = new Bank(ACCOUNT_COUNT, INITIAL_BALANCE);
+        List<Thread> threads = getThreads(bank);
 
         for (Thread thread : threads) {
             try {
@@ -30,10 +33,9 @@ public class Main {
             }
         }
 
-
         int negativeBalance = 0;
         long minimalBalance = Long.MAX_VALUE;
-        for (int i = 0; i < accountCount; i++) {
+        for (int i = 0; i < ACCOUNT_COUNT; i++) {
             Account account = bank.findById(i).get();
             if (account.getBalance() < 0) {
                 negativeBalance++;
@@ -41,32 +43,24 @@ public class Main {
             minimalBalance = Math.min(minimalBalance, account.getBalance());
         }
 
-        int exepctedSum = initialBalance * accountCount;
+        int exepctedSum = INITIAL_BALANCE * ACCOUNT_COUNT;
+
         Instant end = Instant.now();
-        System.out.println("Excpected sum: " + exepctedSum);
-        System.out.println("Actual sum: " + bank.totalBalance());
-        System.out.println("Difference : " + (exepctedSum - bank.totalBalance()));
-        System.out.println("Minimal balance: " + minimalBalance);
-        System.out.println("Negative balance count: " + negativeBalance);
-        System.out.println("Time: " + Duration.between(start, end));
-        System.out.println("Rejected: " + rejected.sum());
-        System.out.println("Race failure: " + raceFailure.sum());
-        System.out.println("Success: " + success.sum());
+        printSummaryReport(exepctedSum, bank, minimalBalance, negativeBalance, start, end);
     }
 
-    private static List<Thread> getThreads(Bank bank, int accountCount) {
+    private static List<Thread> getThreads(Bank bank) {
 
         NaiveTransferService service = new NaiveTransferService(bank);
 
-        int threadCount = 20;
-        List<Thread> threads = new ArrayList<>(threadCount);
-        for (int i = 0; i < threadCount; i++) {
+        List<Thread> threads = new ArrayList<>(THREAD_COUNT);
+        for (int i = 0; i < THREAD_COUNT; i++) {
             Thread thread = new Thread(() -> {
                 ThreadLocalRandom random = ThreadLocalRandom.current();
-                for (int j = 0; j < 100_000; j++) {
-                    int fromId = random.nextInt(accountCount);
-                    int targetId = random.nextInt(accountCount);
-                    int randomAmount = random.nextInt(100_000);
+                for (int j = 0; j < TRANSFERS_PER_THREAD; j++) {
+                    int fromId = random.nextInt(ACCOUNT_COUNT);
+                    int targetId = random.nextInt(ACCOUNT_COUNT);
+                    int randomAmount = random.nextInt(MAX_TRANSFER_AMOUNT);
                     try {
                         boolean transfer = service.transfer(fromId, targetId, randomAmount);
                         if (transfer) {
@@ -83,6 +77,28 @@ public class Main {
             thread.start();
         }
         return threads;
+    }
+
+    private static void printSummaryReport(int exepctedSum, Bank bank, long minimalBalance, int negativeBalance, Instant start, Instant end) {
+        System.out.println("Excpected sum:" + exepctedSum);
+        System.out.println("Actual sum:" + bank.totalBalance());
+        System.out.println("Difference:" + (exepctedSum - bank.totalBalance()));
+        System.out.println("Minimal balance:" + minimalBalance);
+        System.out.println("Negative balance count:" + negativeBalance);
+        System.out.println("Time:" + Duration.between(start, end));
+        System.out.println("Rejected:" + rejected.sum());
+        System.out.println("Race failure:" + raceFailure.sum());
+        System.out.println("Success:" + success.sum());
+    }
+
+    private static void printConfig() {
+        System.out.println("Cores:" + Runtime.getRuntime().availableProcessors());
+        System.out.println("Threads:" + THREAD_COUNT);
+        System.out.println("Transfers per thread:" + TRANSFERS_PER_THREAD);
+        System.out.println("Total transfers:" + ((long) THREAD_COUNT * TRANSFERS_PER_THREAD));
+        System.out.println("Max transfer amount:" + MAX_TRANSFER_AMOUNT);
+        System.out.println("Accounts:" + ACCOUNT_COUNT);
+        System.out.println("Initial balance:" + INITIAL_BALANCE);
     }
 
 }
