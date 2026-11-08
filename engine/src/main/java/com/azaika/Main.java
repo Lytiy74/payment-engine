@@ -33,20 +33,22 @@ public class Main {
             }
         }
 
-        int negativeBalance = 0;
+        int finalNegativeBalance = 0;
+        int inProcessNegativeBalance = 0;
         long minimalBalance = Long.MAX_VALUE;
         for (int i = 0; i < ACCOUNT_COUNT; i++) {
             Account account = bank.findById(i).get();
             if (account.getBalance() < 0) {
-                negativeBalance++;
+                finalNegativeBalance++;
             }
+            inProcessNegativeBalance += (int) account.negativeBalanceOccuranceCounter.sum();
             minimalBalance = Math.min(minimalBalance, account.getBalance());
         }
 
         int expectedSum = INITIAL_BALANCE * ACCOUNT_COUNT;
 
         Instant end = Instant.now();
-        printSummaryReport(expectedSum, bank, minimalBalance, negativeBalance, start, end);
+        printSummaryReport(expectedSum, bank, minimalBalance, finalNegativeBalance, inProcessNegativeBalance, start, end);
     }
 
     private static List<Thread> getThreads(Bank bank) {
@@ -79,12 +81,13 @@ public class Main {
         return threads;
     }
 
-    private static void printSummaryReport(int exepctedSum, Bank bank, long minimalBalance, int negativeBalance, Instant start, Instant end) {
+    private static void printSummaryReport(int exepctedSum, Bank bank, long minimalBalance, int negativeBalance, int inProcessNegativeBalance, Instant start, Instant end) {
         System.out.println("Excpected sum:" + exepctedSum);
         System.out.println("Actual sum:" + bank.totalBalance());
-        System.out.println("Difference:" + (exepctedSum - bank.totalBalance()));
+        System.out.println("Difference:" + (bank.totalBalance() - exepctedSum));
         System.out.println("Minimal balance:" + minimalBalance);
-        System.out.println("Negative balance count:" + negativeBalance);
+        System.out.println("Final Negative balance count:" + negativeBalance);
+        System.out.println("In process Negative balance occurs:" + inProcessNegativeBalance);
         System.out.println("Time:" + Duration.between(start, end));
         System.out.println("Rejected:" + rejected.sum());
         System.out.println("Race failure:" + raceFailure.sum());
