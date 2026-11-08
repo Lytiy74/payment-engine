@@ -11,8 +11,8 @@ public class Main {
     private static final int INITIAL_BALANCE = 100_000;
     private static final int TRANSFERS_PER_THREAD = 100_000;
     private static final int MAX_TRANSFER_AMOUNT = 100_000;
-    private static final int ACCOUNT_COUNT = 2;
-    private static final int THREAD_COUNT = 1;
+    private static final int ACCOUNT_COUNT = 10;
+    private static final int THREAD_COUNT = 20;
     private static final LongAdder rejected = new LongAdder();
     private static final LongAdder raceFailure = new LongAdder();
     private static final LongAdder success = new LongAdder();
