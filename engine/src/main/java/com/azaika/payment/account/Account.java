@@ -1,11 +1,18 @@
-package com.azaika;
+package com.azaika.payment.account;
 
-import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * A bank account. Money is stored in minor units (kopecks) as {@code long}.
+ *
+ * <p>This class is NOT thread-safe on its own: balance operations are plain reads and writes.
+ * Locking is the job of a {@code TransferService} strategy.
+ */
 public final class Account {
     private final long id;
+    private final Lock lock = new ReentrantLock();
     private long balance;
-    public final LongAdder negativeBalanceOccuranceCounter = new LongAdder();
 
     public Account(long id, long balance) {
         this.id = id;
@@ -23,6 +30,15 @@ public final class Account {
         return id;
     }
 
+    /**
+     * The explicit lock of this account.
+     *
+     * <p>Not used before task 2.3. Strategies built on {@code synchronized} lock on the account object itself.
+     */
+    public Lock lock() {
+        return lock;
+    }
+
     public void deposit(long amount) {
         if (amount <= 0) {
             throw new IllegalArgumentException("Amount must be positive");
@@ -32,15 +48,12 @@ public final class Account {
 
     public void withdraw(long amount) {
         if (amount <= 0) {
-            throw new IllegalArgumentException("Amount must be non-negative");
+            throw new IllegalArgumentException("Amount must be positive");
         }
         if (amount > balance) {
             throw new IllegalStateException("Insufficient funds");
         }
         balance -= amount;
-        if (balance < 0) {
-            negativeBalanceOccuranceCounter.increment();
-        }
     }
 
     @Override
