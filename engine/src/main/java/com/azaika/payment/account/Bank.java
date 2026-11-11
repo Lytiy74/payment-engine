@@ -1,7 +1,14 @@
-package com.azaika;
+package com.azaika.payment.account;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
+/**
+ * The registry of accounts.
+ *
+ * <p>Accounts created by the constructor get ids {@code 0 .. accountCount - 1}.
+ */
 public final class Bank {
 
     private final Map<Long, Account> accounts;
@@ -21,6 +28,19 @@ public final class Bank {
                 .stream()
                 .mapToLong(Account::getBalance)
                 .sum();
+    }
+
+    public int accountCount() {
+        return accounts.size();
+    }
+
+    /**
+     * Opens a new account with a unique id and the given balance. Safe to call from many threads.
+     *
+     * <p>Task 3.2. See ROADMAP.md.
+     */
+    public Account openAccount(long initialBalance) {
+        throw new UnsupportedOperationException("Task 3.2: Bank.openAccount is not implemented yet");
     }
 
     private void init(int accountCount, long initialBalance) {

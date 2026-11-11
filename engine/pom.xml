@@ -34,7 +34,7 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.azaika.Main</mainClass>
+                                    <mainClass>com.azaika.payment.sim.Simulator</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

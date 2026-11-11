@@ -1,4 +1,4 @@
-package com.azaika;
+package com.azaika.payment.account;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +27,11 @@ public class BankTest {
         Optional<Account> account = bank.findById(1);
         assertTrue(account.isPresent());
         assertEquals(INITIAL_BALANCE, account.get().getBalance());
+    }
+
+    @Test
+    void accountCount_returnsNumberOfAccounts() {
+        assertEquals(ACCOUNT_COUNT, bank.accountCount());
     }
 
     @Test

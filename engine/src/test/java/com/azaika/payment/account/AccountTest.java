@@ -1,4 +1,4 @@
-package com.azaika;
+package com.azaika.payment.account;
 
 import org.junit.jupiter.api.Test;
 
