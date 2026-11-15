@@ -17,7 +17,6 @@ import java.util.concurrent.locks.Lock;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Disabled("Task 2.3: delete this line when you start the task")
 class TryLockTransferServiceTest extends TransferConcurrencyContract {
     private static final Duration LOCK_TIMEOUT = Duration.ofMillis(200);
 
