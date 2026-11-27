@@ -1,6 +1,9 @@
 package com.azaika.payment.transfer;
 
+import com.azaika.payment.account.Account;
 import com.azaika.payment.account.Bank;
+
+import java.util.Optional;
 
 /**
  * Correct under concurrent load with one lock per account, and free of deadlock thanks to lock ordering.
@@ -16,6 +19,40 @@ public final class OrderedLockTransferService implements TransferService {
 
     @Override
     public TransferResult transfer(long fromId, long toId, long amount) {
-        throw new UnsupportedOperationException("Task 2.2: OrderedLockTransferService is not implemented yet");
+        if (amount <= 0) {
+            return TransferResult.INVALID_AMOUNT;
+        }
+
+        if (fromId == toId) {
+            return TransferResult.SAME_ACCOUNT;
+        }
+
+        Optional<Account> fromOptional = bank.findById(fromId);
+        Optional<Account> toOptional = bank.findById(toId);
+
+        if (fromOptional.isEmpty() || toOptional.isEmpty()) {
+            return TransferResult.ACCOUNT_NOT_FOUND;
+        }
+
+        Account from = fromOptional.get();
+        Account to = toOptional.get();
+        Account first = from.getId() < to.getId() ? from : to;
+        Account second = first == from ? to : from;
+
+        synchronized (first) {
+            synchronized (second) {
+                if (from.getBalance() < amount) {
+                    return TransferResult.INSUFFICIENT_FUNDS;
+                }
+
+                try {
+                    to.deposit(amount);
+                    from.withdraw(amount);
+                } catch (ArithmeticException e) {
+                    return TransferResult.BALANCE_OVERFLOW;
+                }
+            }
+        }
+        return TransferResult.SUCCESS;
     }
 }

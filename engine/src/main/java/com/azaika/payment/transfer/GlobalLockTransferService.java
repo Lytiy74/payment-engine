@@ -18,7 +18,7 @@ public final class GlobalLockTransferService implements TransferService {
     }
 
     @Override
-    public TransferResult transfer(long fromId, long toId, long amount) {
+    public synchronized TransferResult transfer(long fromId, long toId, long amount) {
         if (amount <= 0) {
             return TransferResult.INVALID_AMOUNT;
         }
@@ -36,23 +36,18 @@ public final class GlobalLockTransferService implements TransferService {
 
         Account from = fromOptional.get();
         Account to = toOptional.get();
-        Account first = from.getId() < to.getId() ? from : to;
-        Account second = first == from ? to : from;
 
-        synchronized (first) {
-            synchronized (second) {
-                if (from.getBalance() < amount) {
-                    return TransferResult.INSUFFICIENT_FUNDS;
-                }
-
-                try {
-                    to.deposit(amount);
-                    from.withdraw(amount);
-                } catch (ArithmeticException e) {
-                    return TransferResult.BALANCE_OVERFLOW;
-                }
-            }
+        if (from.getBalance() < amount) {
+            return TransferResult.INSUFFICIENT_FUNDS;
         }
+
+        try {
+            to.deposit(amount);
+            from.withdraw(amount);
+        } catch (ArithmeticException e) {
+            return TransferResult.BALANCE_OVERFLOW;
+        }
+
         return TransferResult.SUCCESS;
     }
 }
